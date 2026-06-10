@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /panels/{panelId} {
+      allow read, write: if request.auth != null
+        && (
+          request.auth.uid == panelId
+          || request.auth.token.email == "contato.vitortharles@gmail.com"
+        );
+
+      match /portraitChunks/{chunkId} {
+        allow read, write: if request.auth != null
+          && (
+            request.auth.uid == panelId
+            || request.auth.token.email == "contato.vitortharles@gmail.com"
+          );
+      }
+    }
+  }
+}

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The First Defense — Painel Vivo Final Otimizado</title>
+<style>
+:root{
+  --danger:0;
+  --exhaustion:0;
+  --moraleLoss:0;
+  --portrait-x:50%;
+  --portrait-y:50%;
+  --portrait-scale:1;
+  --hue:0deg;
+  --vignette:.40;
+  --grain:.11;
+  --bloodOpacity:0;
+  --theme:#b08a42;
+  --themeSoft:rgba(176,138,66,.28);
+  --bg:#080705;
+  --paper:#1c160f;
+  --ink:#eadbc1;
+  --muted:#9d8865;
+  --blood:#981313;
+  --bloodBright:#df2b20;
+  --stamina:#d0a13a;
+  --morale:#8fb3c7;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; color:var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(202,143,45,.14), transparent 25%),
+    radial-gradient(circle at 86% 8%, rgba(103,16,16,.18), transparent 25%),
+    linear-gradient(135deg,#050403,#15110c 52%,#050403);
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.28;
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+.app{display:grid; grid-template-columns:395px minmax(740px,1fr); gap:24px; padding:22px;}
+.controls{
+  position:sticky; top:18px; align-self:start; max-height:calc(100vh - 36px); overflow:auto;
+  background:linear-gradient(180deg,rgba(43,34,23,.98),rgba(10,9,7,.98));
+  border:1px solid rgba(218,178,92,.38);
+  border-radius:20px; padding:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6), inset 0 0 40px rgba(236,180,79,.055);
+}
+.controls h1{margin:0; font-size:23px; letter-spacing:.15em; text-transform:uppercase}
+.controls .tag{color:#a89065; font-size:12px; line-height:1.35}
+.group{border-top:1px solid rgba(218,178,92,.22); margin-top:16px; padding-top:14px}
+label{display:block; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:#d4b77c; margin:10px 0 5px}
+input,textarea,select{
+  width:100%; background:#0b0907; color:#ecdcc0;
+  border:1px solid rgba(218,178,92,.36); border-radius:10px;
+  padding:10px 11px; outline:none; font-family:Georgia,"Times New Roman",serif;
+}
+textarea{min-height:74px; resize:vertical}
+input[type=range]{accent-color:#bd9137; padding:0; border:0; background:transparent}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+.btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+button{
+  border:1px solid rgba(226,185,95,.45); color:#f2dfbd;
+  background:linear-gradient(180deg,#3a2b16,#15100a); border-radius:10px;
+  padding:10px 12px; cursor:pointer; font-weight:bold; letter-spacing:.04em;
+}
+button:hover{filter:brightness(1.14)}
+button.danger{border-color:rgba(188,42,35,.7); color:#ffd0ca}
+.stage{display:flex; justify-content:center; align-items:flex-start; min-height:calc(100vh - 44px)}
+.card{
+  width:820px; min-height:1120px; position:relative; overflow:hidden; border-radius:24px;
+  background:
+    radial-gradient(circle at 70% 18%, color-mix(in srgb, var(--theme) 22%, transparent), transparent 25%),
+    linear-gradient(115deg,rgba(255,255,255,.045), transparent 24%, rgba(0,0,0,.24) 76%),
+    linear-gradient(180deg,#2a2116,#130f0b 55%,#070604);
+  border:2px solid rgba(218,178,92,.50);
+  box-shadow:0 38px 110px rgba(0,0,0,.78), inset 0 0 120px rgba(0,0,0,.62);
+  padding:34px;
+  filter:hue-rotate(var(--hue));
+}
+.card::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,calc(var(--grain)*.25)), rgba(255,255,255,calc(var(--grain)*.25)) 1px, transparent 1px, transparent 5px),
+    radial-gradient(circle at 50% 34%, transparent 0 38%, rgba(0,0,0,var(--vignette)) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.38),transparent 18%,transparent 82%,rgba(0,0,0,.38));
+  mix-blend-mode:overlay;
+}
+.card::after{
+  content:""; position:absolute; inset:0; pointer-events:none; transition:.3s ease;
+  background:
+    radial-gradient(circle at 50% 38%, transparent 0 34%, rgba(0,0,0,calc(.10 + var(--danger)*.42)) 100%),
+    linear-gradient(0deg, rgba(100,0,0,calc(var(--danger)*.32)), transparent 56%),
+    linear-gradient(180deg, rgba(0,0,0,calc(var(--exhaustion)*.36)), transparent 38%, rgba(0,0,0,calc(var(--exhaustion)*.42))),
+    linear-gradient(90deg, rgba(0,0,0,calc(var(--moraleLoss)*.18)), transparent 45%, rgba(20,30,40,calc(var(--moraleLoss)*.16)));
+}
+.corner{
+  position:absolute; width:92px; height:92px; opacity:.62; pointer-events:none;
+  border-color:rgba(218,178,92,.5);
+}
+.c1{left:18px; top:18px; border-left:2px solid; border-top:2px solid; border-radius:18px 0 0 0}
+.c2{right:18px; top:18px; border-right:2px solid; border-top:2px solid; border-radius:0 18px 0 0}
+.c3{left:18px; bottom:18px; border-left:2px solid; border-bottom:2px solid; border-radius:0 0 0 18px}
+.c4{right:18px; bottom:18px; border-right:2px solid; border-bottom:2px solid; border-radius:0 0 18px 0}
+.watermark{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:260px; opacity:.035; z-index:0; pointer-events:none; transform:rotate(-12deg);
+}
+.topline,.main,.bars,.condition,.notes,.equipment,.footer{position:relative; z-index:2}
+.topline{display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(218,178,92,.32); padding-bottom:14px}
+.brand{font-size:14px; letter-spacing:.30em; color:#d8b366; text-transform:uppercase}
+.registry{color:#8f7b5b; font-size:11px; text-transform:uppercase; letter-spacing:.16em}
+.crestRow{display:flex; gap:8px; align-items:center}
+.miniCrest{
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(218,178,92,.48); background:rgba(0,0,0,.28); color:#d7b067; font-size:18px;
+}
+.main{display:grid; grid-template-columns:325px 1fr; gap:24px; margin-top:24px}
+.portraitBox{
+  position:relative; height:460px; border:1px solid rgba(230,188,101,.50); border-radius:20px; overflow:hidden;
+  background:#080706; box-shadow:inset 0 0 34px rgba(0,0,0,.92),0 16px 45px rgba(0,0,0,.42);
+}
+#portrait{width:100%; height:100%; object-fit:cover; object-position:var(--portrait-x) var(--portrait-y); transform:scale(var(--portrait-scale)); transition:.25s ease;
+  filter:contrast(calc(1.04 + var(--danger)*.18)) saturate(calc(.98 - var(--danger)*.28)) brightness(calc(1 - var(--danger)*.22 - var(--exhaustion)*.16));
+}
+.portraitBox::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(0deg,rgba(114,0,0,calc(var(--danger)*.32)),transparent 60%),
+    radial-gradient(circle at 50% 22%,transparent 23%,rgba(0,0,0,.38));
+}
+.photoStamp{position:absolute; left:14px; bottom:14px; border:1px solid rgba(218,178,92,.56); background:rgba(0,0,0,.48); color:#d3ad64; padding:5px 8px; font-size:10px; letter-spacing:.14em}
+.statusRibbon{
+  position:absolute; right:-40px; top:22px; width:170px; text-align:center; transform:rotate(33deg);
+  background:rgba(120,14,14,calc(var(--danger)*.78)); border:1px solid rgba(230,60,45,calc(var(--danger)));
+  color:rgba(255,224,214,calc(var(--danger))); padding:5px 0; font-size:10px; letter-spacing:.14em;
+}
+.infoPanel{
+  border:1px solid rgba(218,178,92,.26); border-radius:20px; padding:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.20));
+}
+.name{font-size:34px; line-height:1.02; text-transform:uppercase; letter-spacing:.07em; margin-bottom:8px; text-shadow:0 0 22px rgba(218,178,92,.12)}
+.sub{color:#d2aa5c; text-transform:uppercase; letter-spacing:.17em; font-size:12px; margin-bottom:17px}
+.dataGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.data{background:rgba(0,0,0,.20); border:1px solid rgba(218,178,92,.18); padding:10px; border-radius:12px; min-height:58px}
+.data b{display:block; color:#8c7957; font-size:10px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:4px}
+.data span{font-size:15px}
+.quote{margin-top:15px; padding:14px; border-left:3px solid rgba(177,18,18,calc(.25 + var(--danger)*.65)); background:rgba(0,0,0,.23); color:#ead9bb; font-style:italic; line-height:1.45}
+.vitalSeal{
+  margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.metric{
+  border:1px dashed rgba(218,178,92,.25); padding:8px; border-radius:12px; text-align:center;
+  background:rgba(255,255,255,.025);
+}
+.metric strong{display:block; font-size:21px; color:#e3c37d}
+.metric small{text-transform:uppercase; letter-spacing:.12em; color:#8f7b5b}
+.bars{margin-top:22px; display:grid; gap:14px}
+.statusLine{border:1px solid rgba(218,178,92,.25); background:rgba(0,0,0,.24); border-radius:17px; padding:14px}
+.statusHead{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px}
+.statusName{text-transform:uppercase; letter-spacing:.17em; color:#d8bd7f; font-size:12px}
+.statusValue{font-weight:bold;color:#f1e6d2}
+.bar{height:24px; border-radius:999px; background:rgba(0,0,0,.57); border:1px solid rgba(230,208,159,.2); overflow:hidden; position:relative}
+.fill{height:100%; width:100%; transition:.35s ease; border-radius:999px; box-shadow:inset 0 0 16px rgba(255,255,255,.10)}
+.hp .fill{background:linear-gradient(90deg,#421010,#941818,#e03525)}
+.stamina .fill{background:linear-gradient(90deg,#523b13,#af7f22,#ebc163)}
+.morale .fill{background:linear-gradient(90deg,#253a4c,#52738e,#a8c4d2)}
+.armor .fill{background:linear-gradient(90deg,#30353a,#777d82,#c5c8c7)}
+.bar::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); opacity:.45}
+.damageFx{position:absolute; right:0; top:0; bottom:0; width:calc(var(--danger)*100%); background:repeating-linear-gradient(135deg,rgba(0,0,0,.22),rgba(0,0,0,.22) 5px,rgba(255,0,0,.16) 5px,rgba(255,0,0,.16) 10px); mix-blend-mode:multiply}
+.condition{margin-top:18px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px}
+.cond{text-align:center; border:1px solid rgba(218,178,92,.2); padding:10px 7px; border-radius:14px; background:rgba(0,0,0,.22); opacity:.40; transition:.2s}
+.cond.active{opacity:1; background:linear-gradient(180deg,rgba(117,18,15,.36),rgba(0,0,0,.28)); border-color:rgba(184,37,28,.55); box-shadow:0 0 24px rgba(135,12,12,.18)}
+.cond .icon{font-size:22px; display:block; margin-bottom:4px}.cond b{font-size:9px; letter-spacing:.10em; text-transform:uppercase}
+.notes,.equipment{margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.panel{border:1px solid rgba(218,178,92,.25); background:rgba(0,0,0,.20); border-radius:17px; padding:16px}
+.panel h3{margin:0 0 10px; color:#d0ad65; font-size:13px; text-transform:uppercase; letter-spacing:.16em}
+.traits{display:flex; flex-wrap:wrap; gap:8px}.trait{border:1px solid rgba(218,178,92,.28); background:rgba(255,255,255,.035); padding:7px 9px; border-radius:999px; font-size:12px}
+.log{font-size:12px; line-height:1.55; color:#dac8a9; max-height:130px; overflow:auto}
+.footer{margin-top:22px; display:flex; justify-content:space-between; align-items:flex-end; color:#85704f; border-top:1px solid rgba(218,178,92,.25); padding-top:14px; font-size:11px; letter-spacing:.12em; text-transform:uppercase}
+.seal{width:86px;height:86px;border-radius:50%; border:2px double rgba(177,18,18,.66); display:flex;align-items:center;justify-content:center; color:rgba(217,51,40,.78); transform:rotate(-9deg); font-weight:bold; font-size:12px; text-align:center}
+.bloodmark{position:absolute; pointer-events:none; opacity:calc(var(--danger)*.95); transition:.35s ease}
+.b1{right:68px; top:214px; width:145px; height:145px; background:radial-gradient(circle,rgba(126,0,0,.36),transparent 63%); filter:blur(1px)}
+.b2{left:28px; bottom:190px; width:195px; height:112px; background:radial-gradient(circle,rgba(160,0,0,.24),transparent 65%); transform:rotate(18deg)}
+.crack{position:absolute; inset:0; opacity:calc(var(--danger)*.18); pointer-events:none; background:
+  linear-gradient(125deg, transparent 22%, rgba(255,255,255,.35) 22.2%, transparent 22.6%),
+  linear-gradient(47deg, transparent 57%, rgba(255,255,255,.26) 57.2%, transparent 57.6%);
+  mix-blend-mode:overlay;
+}
+
+.deathbox{
+  position:relative; z-index:2;
+  margin-top:18px;
+  border:1px solid rgba(150,30,25,calc(var(--danger)*.78));
+  background:rgba(80,0,0,calc(var(--danger)*.20));
+  border-radius:18px;
+  padding:14px;
+  display:none;
+  line-height:1.45;
+}
+.deathbox.show{display:block}
+.deathbox b{color:#ffb1a5;text-transform:uppercase;letter-spacing:.14em}
+.card.ultimate-critical{
+  animation: criticalPulse 1.8s infinite ease-in-out;
+}
+@keyframes criticalPulse{
+  0%,100%{box-shadow:0 38px 110px rgba(0,0,0,.78), inset 0 0 125px rgba(0,0,0,.64)}
+  50%{box-shadow:0 38px 120px rgba(80,0,0,.55), inset 0 0 150px rgba(120,0,0,.22)}
+}
+
+@media(max-width:1120px){.app{grid-template-columns:1fr}.controls{position:relative; top:0; max-height:none}.card{width:100%}}
+@media(max-width:760px){.main,.notes,.equipment{grid-template-columns:1fr}.condition{grid-template-columns:repeat(2,1fr)}.app{padding:10px}.card{padding:20px}.controls{padding:14px}}
+@media print{body{background:#111}.controls{display:none}.app{display:block;padding:0}.card{width:100%;min-height:100vh;border-radius:0;box-shadow:none}.stage{min-height:auto}}
+
+/* ===== THE FIRST DEFENSE — VERSÃO FINAL PRÁTICA ===== */
+.statusLine.hp .statusName::after{
+  content:" — porcentagem";
+  color:#8d795a;
+  font-size:9px;
+  letter-spacing:.10em;
+}
+.statusLine.hp .fill{
+  background:linear-gradient(90deg,#4e0d0d,#962019,#d24628,#d69b37,#577f3f);
+  background-size:220% 100%;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.12), 0 0 calc(var(--danger) * 26px) rgba(180,20,15,.45);
+}
+.statusLine.stamina .fill{
+  background:linear-gradient(90deg,#3f3f3f,#526b78,#3f83a0,#8ec7d7);
+  background-size:220% 100%;
+}
+.statusLine.morale .fill{
+  background:linear-gradient(90deg,#4b4b4b,#7a5d24,#c59a37,#e5c873);
+  background-size:220% 100%;
+}
+.statusLine.armor .fill{
+  background:linear-gradient(90deg,#322b24,#66523c,#9a815d,#d1b782);
+  background-size:220% 100%;
+}
+.statusLine .bar{
+  box-shadow:inset 0 0 10px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.04);
+}
+.statusLine .bar::before{
+  content:"";
+  position:absolute;
+  inset:2px;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.20),transparent 48%,rgba(0,0,0,.24));
+  pointer-events:none;
+  z-index:2;
+}
+.statusLine .fill{
+  position:relative;
+  transition:width .28s ease, filter .28s ease, background-position .28s ease;
+}
+.statusLine .fill::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  opacity:.35;
+}
+.card.state-operacional{--stateTint:0;}
+.card.state-ferido{filter:hue-rotate(6deg) saturate(.98);}
+.card.state-sangrando{filter:hue-rotate(10deg) saturate(.92);}
+.card.state-critico{filter:hue-rotate(14deg) saturate(.82) brightness(.92);}
+.card.state-inconsciente{filter:saturate(.42) brightness(.78) contrast(1.08);}
+.card.state-ferido::after{
+  background:
+    radial-gradient(circle at 50% 45%, transparent 0 42%, rgba(0,0,0,calc(.18 + var(--danger)*.38)) 100%),
+    linear-gradient(0deg, rgba(110,55,0,.10), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,calc(var(--exhaustion)*.22)), transparent 40%, rgba(0,0,0,calc(var(--exhaustion)*.32)));
+}
+.card.state-sangrando::after{
+  background:
+    radial-gradient(circle at 50% 45%, transparent 0 42%, rgba(0,0,0,calc(.20 + var(--danger)*.42)) 100%),
+    linear-gradient(0deg, rgba(120,0,0,calc(.12 + var(--danger)*.30)), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,calc(var(--exhaustion)*.24)), transparent 40%, rgba(0,0,0,calc(var(--exhaustion)*.34)));
+}
+.card.state-critico::after,.card.state-inconsciente::after{
+  background:
+    radial-gradient(circle at 50% 42%, transparent 0 34%, rgba(0,0,0,calc(.38 + var(--danger)*.45)) 100%),
+    linear-gradient(0deg, rgba(120,0,0,calc(.24 + var(--danger)*.34)), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,.24), transparent 40%, rgba(0,0,0,.46));
+}
+.card.state-critico{
+  animation: finalCriticalPulse 1.8s ease-in-out infinite;
+}
+.card.state-inconsciente{
+  animation:none !important;
+}
+@keyframes finalCriticalPulse{
+  0%,100%{box-shadow:0 35px 90px rgba(0,0,0,.72), inset 0 0 95px rgba(0,0,0,.62)}
+  50%{box-shadow:0 35px 105px rgba(90,0,0,.42), inset 0 0 120px rgba(120,0,0,.18)}
+}
+.condition{
+  grid-template-columns:repeat(5,1fr) !important;
+}
+.cond.active{
+  transform:translateY(-1px);
+}
+#physicalCondition{
+  color:#e6c57d;
+}
+
+
+/* ===== AJUSTES FINAIS — confiança, clique em estados e barras premium ===== */
+.vitalSeal{
+  grid-template-columns:repeat(4,1fr) !important;
+}
+#trustMetric{
+  color:#d8b66d;
+}
+.statusLine.stamina .fill{
+  background:linear-gradient(90deg,#39413d,#4f6959,#6d9f72,#9bd883) !important;
+  background-size:220% 100% !important;
+  filter:saturate(calc(.70 + var(--exhaustion) * -.25 + .55));
+}
+.statusLine.stamina .bar{
+  box-shadow:inset 0 0 10px rgba(0,0,0,.78), 0 0 calc(var(--exhaustion) * 18px) rgba(85,130,90,.18);
+}
+.statusLine.morale .fill{
+  background:linear-gradient(90deg,#3b3b40,#655534,#a98031,#e3c66a) !important;
+  background-size:220% 100% !important;
+}
+.statusLine.hp .fill,
+.statusLine.morale .fill,
+.statusLine.stamina .fill,
+.statusLine.armor .fill{
+  border-right:1px solid rgba(255,255,255,.32);
+}
+.cond{
+  cursor:pointer;
+  user-select:none;
+}
+.cond:hover{
+  opacity:.92;
+  filter:brightness(1.18);
+  transform:translateY(-1px);
+}
+.bloodmark.b3{
+  left:58%;
+  top:132px;
+  width:85px;
+  height:120px;
+  background:radial-gradient(circle at 40% 25%,rgba(170,0,0,.32),transparent 38%),
+             radial-gradient(circle at 70% 58%,rgba(120,0,0,.24),transparent 44%);
+  transform:rotate(-18deg);
+}
+.bloodmark.b4{
+  right:32px;
+  bottom:310px;
+  width:115px;
+  height:150px;
+  background:radial-gradient(circle at 50% 20%,rgba(160,0,0,.28),transparent 40%),
+             radial-gradient(circle at 40% 70%,rgba(90,0,0,.20),transparent 48%);
+  transform:rotate(14deg);
+}
+.bloodmark.b5{
+  left:70px;
+  top:520px;
+  width:95px;
+  height:95px;
+  background:radial-gradient(circle,rgba(135,0,0,.24),transparent 65%);
+}
+.card.state-sangrando .bloodmark,
+.card.state-critico .bloodmark,
+.card.state-inconsciente .bloodmark{
+  opacity:calc(.35 + var(--danger)*.75);
+}
+.card.state-ferido .bloodmark{
+  opacity:calc(var(--danger)*.38);
+}
+.card.state-operacional .bloodmark{
+  opacity:calc(var(--danger)*.18);
+}
+.statusLine .fill::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,transparent 1px 12px);
+  opacity:.28;
+}
+.btns button{
+  min-width:82px;
+}
+
+
+/* ===== AJUSTE FINAL OTIMIZADO — indicadores 2x2 e ficha leve ===== */
+.vitalSeal{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  gap:10px !important;
+  align-items:stretch !important;
+}
+.vitalSeal .metric{
+  min-height:58px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.vitalSeal .metric strong{
+  font-size:20px;
+  line-height:1.05;
+}
+.vitalSeal .metric small{
+  margin-top:4px;
+}
+.card{
+  will-change:auto !important;
+}
+.statusLine .fill,
+.cond,
+.portraitBox{
+  will-change:auto !important;
+}
+.card.state-critico{
+  animation: finalCriticalPulse 2.4s ease-in-out infinite !important;
+}
+@media (prefers-reduced-motion: reduce){
+  .card.state-critico,
+  .cond.active,
+  .portraitBox,
+  .statusLine .fill::after{
+    animation:none !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="controls">
+  <h1>Painel Final</h1>
+  <div class="tag">The First Defense — versão final prática com vitalidade em porcentagem, estados narrativos e barras otimizadas.</div>
+
+  <div class="group">
+    <label>Foto do personagem</label><input type="file" id="photoInput" accept="image/*">
+    <div class="row"><div><label>Zoom</label><input type="range" id="zoom" min="1" max="2.7" step=".01" value="1"></div><div><label>Vertical</label><input type="range" id="posY" min="0" max="100" value="50"></div></div>
+    <label>Horizontal</label><input type="range" id="posX" min="0" max="100" value="50">
+  </div>
+
+  <div class="group">
+    <label>Nome</label><input type="text" id="nameInput" value="GREGOR EREYZ">
+    <div class="row"><div><label>Idade</label><input type="number" id="ageInput" value="49"></div><div><label>Registro</label><input type="text" id="regInput" value="M-780-041"></div></div>
+    <label>Divisão / Cargo</label><input type="text" id="roleInput" value="Comandante da Polícia Militar">
+    <label>Família / Pacote</label><input type="text" id="familyInput" value="Ereyz • Pacote Comando">
+    <label>Citação pessoal</label><textarea id="quoteInput">Faça o que deve ser feito sem remorso, sem medo e especialmente sem compaixão. Acerte primeiro.</textarea>
+  </div>
+
+  <div class="group">
+    <div class="row"><div><label>Vida Máx.</label><input type="number" id="hpMax" value="100"></div><div><label>Vida Atual</label><input type="number" id="hpNow" value="100"></div></div>
+    <input type="range" id="hpSlider" min="0" max="100" value="100">
+    <div class="row"><div><label>Estamina Máx.</label><input type="number" id="stMax" value="80"></div><div><label>Estamina Atual</label><input type="number" id="stNow" value="80"></div></div>
+    <input type="range" id="stSlider" min="0" max="80" value="80">
+    <div class="row"><div><label>Moral Máx.</label><input type="number" id="moMax" value="60"></div><div><label>Moral Atual</label><input type="number" id="moNow" value="60"></div></div>
+    <input type="range" id="moSlider" min="0" max="60" value="60">
+    <div class="row"><div><label>Resistência Máx.</label><input type="number" id="arMax" value="30"></div><div><label>Resistência Atual</label><input type="number" id="arNow" value="30"></div></div>
+    <input type="range" id="arSlider" min="0" max="30" value="30">
+      <div class="row">
+        <div><label>Ferimentos</label><input type="number" id="injuryInput" value="0"></div>
+        <div><label>Exposição</label><input type="number" id="exposureInput" value="0"></div>
+      </div>
+  </div>
+
+  <div class="group">
+    <label>Estado narrativo</label>
+    <select id="conditionSelect"><option value="normal">Operacional</option><option value="ferido">Ferido</option><option value="sangrando">Sangrando</option><option value="critico">Crítico</option><option value="inconsciente">Inconsciente</option></select>
+    <div class="row"><div><label>Tema</label><select id="themeSelect"><option value="gold">Conselho / Neutro</option><option value="mp">Polícia Militar</option><option value="garrison">Guarnição</option><option value="cadet">Cadetes</option><option value="scout">Reconhecimento</option></select></div><div><label>Filtro</label><select id="filterSelect"><option value="cinematic">Cinemático</option><option value="cold">Frio</option><option value="bloody">Crítico</option><option value="paper">Documento</option></select></div></div>
+    <div class="three"><div><label>Vinheta</label><input type="range" id="vignette" min=".15" max=".75" step=".01" value=".40"></div><div><label>Grão</label><input type="range" id="grain" min=".02" max=".28" step=".01" value=".11"></div><div><label>Tom</label><input type="range" id="hue" min="-40" max="40" value="0"></div></div>
+  </div>
+
+  <div class="group">
+    <label>Anotações rápidas</label><textarea id="notesInput">• Equipamento padrão revisado.
+• Aguardando ordem de avanço.
+• Sem ferimentos graves registrados.</textarea>
+    <label>Traços / Habilidades</label><input type="text" id="traitsInput" value="Autoridade, Frieza, Mira disciplinada, Sobrevivência">
+    <label>Equipamentos</label><input type="text" id="equipInput" value="Mosquete curto, lâmina reserva, capa militar, kit de sinalização">
+  </div>
+
+  <div class="btns">
+    <button onclick="applyAttack()">Ataque</button><button onclick="rest()">Descanso</button>
+    <button onclick="quickDamage(1)">-1 Vida</button><button onclick="quickDamage(5)">-5 Vida</button><button onclick="quickDamage(10)">-10 Vida</button>
+    <button onclick="healVitality(1)">+1 Vida</button><button onclick="healVitality(5)">+5 Vida</button>
+    <button onclick="quickStamina(1)">-1 Estamina</button><button onclick="quickStamina(5)">-5 Estamina</button><button onclick="quickStamina(10)">-10 Estamina</button>
+    <button onclick="healStamina(1)">+1 Estamina</button><button onclick="healStamina(5)">+5 Estamina</button>
+    <button onclick="quickMorale(1)">-1 Moral</button><button onclick="quickMorale(5)">-5 Moral</button>
+    <button onclick="healMorale(1)">+1 Moral</button><button onclick="healMorale(5)">+5 Moral</button>
+    <button onclick="saveSheet()">Salvar</button><button onclick="loadSheet()">Carregar</button><button onclick="exportJSON()">Exportar JSON</button><button onclick="window.print()">PDF</button><button class="danger" onclick="resetSheet()">Resetar</button>
+  </div>
+</aside>
+
+<main class="stage">
+<section class="card" id="card">
+  <div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
+  <div class="watermark" id="watermark">♜</div>
+  <div class="bloodmark b1"></div><div class="bloodmark b2"></div><div class="bloodmark b3"></div><div class="bloodmark b4"></div><div class="bloodmark b5"></div><div class="crack"></div>
+
+  <div class="topline">
+    <div><div class="brand">The First Defense</div><div class="registry">Identidade nas Muralhas • Painel de Vitalidade</div></div>
+    <div class="crestRow"><div class="miniCrest" id="crest1">♜</div><div class="miniCrest" id="crest2">♜</div><div class="registry" id="regView">M-780-041</div></div>
+  </div>
+
+  <div class="main">
+    <div class="portraitBox"><img id="portrait" alt="Portrait" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='850'%3E%3Crect width='100%25' height='100%25' fill='%23110d09'/%3E%3Ctext x='50%25' y='47%25' fill='%23b08a42' font-family='Georgia' font-size='28' text-anchor='middle'%3EINSERIR FOTO%3C/text%3E%3Ctext x='50%25' y='53%25' fill='%23766548' font-family='Georgia' font-size='16' text-anchor='middle'%3EPortrait do jogador%3C/text%3E%3C/svg%3E"><div class="photoStamp">ARQUIVO MILITAR</div><div class="statusRibbon">RISCO CRÍTICO</div></div>
+    <div class="infoPanel">
+      <div class="name" id="nameView">GREGOR EREYZ</div>
+      <div class="sub" id="roleView">Comandante da Polícia Militar</div>
+      <div class="dataGrid">
+        <div class="data"><b>Idade</b><span id="ageView">49 Anos</span></div><div class="data"><b>Status</b><span id="statusView">Operacional</span></div>
+        <div class="data"><b>Família / Pacote</b><span id="familyView">Ereyz • Pacote Comando</span></div><div class="data"><b>Registro</b><span id="regView2">M-780-041</span></div>
+      </div>
+      <div class="quote" id="quoteView">“Faça o que deve ser feito sem remorso, sem medo e especialmente sem compaixão. Acerte primeiro.”</div>
+      <div class="vitalSeal">
+        <div class="metric"><strong id="riskMetric">0%</strong><small>Risco</small></div>
+        <div class="metric"><strong id="fatigueMetric">0%</strong><small>Fadiga</small></div><div class="metric"><strong id="physicalCondition">Excelente</strong><small>Condição</small></div><div class="metric"><strong id="trustMetric">Confiável</strong><small>Confiança</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bars">
+    <div class="statusLine hp"><div class="statusHead"><span class="statusName">Vitalidade</span><span class="statusValue" id="hpText">100 / 100</span></div><div class="bar"><div class="fill" id="hpFill"></div><div class="damageFx"></div></div></div>
+    <div class="statusLine stamina"><div class="statusHead"><span class="statusName">Estamina</span><span class="statusValue" id="stText">80 / 80</span></div><div class="bar"><div class="fill" id="stFill"></div></div></div>
+    <div class="statusLine morale"><div class="statusHead"><span class="statusName">Moral</span><span class="statusValue" id="moText">60 / 60</span></div><div class="bar"><div class="fill" id="moFill"></div></div></div>
+    <div class="statusLine armor"><div class="statusHead"><span class="statusName">Resistência a Dano</span><span class="statusValue" id="arText">30 / 30</span></div><div class="bar"><div class="fill" id="arFill"></div></div></div>
+  </div>
+
+  <div class="condition">
+    <div class="cond" id="cond-normal"><span class="icon">♜</span><b>Operacional</b></div>
+    <div class="cond" id="cond-ferido"><span class="icon">✚</span><b>Ferido</b></div>
+    <div class="cond" id="cond-sangrando"><span class="icon">✦</span><b>Sangrando</b></div>
+    <div class="cond" id="cond-critico"><span class="icon">☗</span><b>Crítico</b></div>
+    
+    <div class="cond" id="cond-inconsciente"><span class="icon">☠</span><b>Inconsciente</b></div>
+  </div>
+  <div class="deathbox" id="deathbox"><b>Protocolo de emergência:</b> condição extrema detectada. Recomenda-se retirada, atendimento imediato ou teste narrativo de sobrevivência.</div>
+
+  <div class="notes">
+    <div class="panel"><h3>Observações de campo</h3><div id="notesView" style="white-space:pre-line; line-height:1.55;"></div></div>
+    <div class="panel"><h3>Traços ativos</h3><div class="traits" id="traitsView"></div></div>
+  </div>
+  <div class="equipment">
+    <div class="panel"><h3>Equipamentos</h3><div class="traits" id="equipView"></div></div>
+    <div class="panel"><h3>Registro de combate</h3><div class="log" id="logView">Nenhuma alteração registrada.</div></div>
+  </div>
+
+  <div class="footer"><div>Conselho Real • Registro interno • Ano 780</div><div class="seal">SELO<br>REAL</div></div>
+</section>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fields=["nameInput","ageInput","regInput","roleInput","familyInput","quoteInput","hpMax","hpNow","stMax","stNow","moMax","moNow","arMax","arNow","injuryInput","exposureInput","conditionSelect","themeSelect","filterSelect","vignette","grain","hue","notesInput","traitsInput","equipInput","zoom","posX","posY"];
+let combatLog=[];
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function pct(n,m){return m<=0?0:clamp((n/m)*100,0,100)}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function syncRange(num,range,max){$(range).max=+$(max).value||1; $(range).value=clamp(+$(num).value||0,0,+$(max).value||1)}
+function tokenize(str){return (str||"").split(",").map(t=>t.trim()).filter(Boolean).map(t=>`<span class="trait">${escapeHtml(t)}</span>`).join("")}
+function theme(){
+ const t=$("themeSelect").value; let color="#b08a42", crest="♜";
+ if(t==="mp"){color="#4f8a42";crest="♞"} if(t==="garrison"){color="#b52b2b";crest="✾"} if(t==="cadet"){color="#b89138";crest="⚔"} if(t==="scout"){color="#3f6e9b";crest="♚"}
+ document.documentElement.style.setProperty("--theme",color); $("crest1").textContent=crest; $("crest2").textContent=crest; $("watermark").textContent=crest;
+}
+function filter(){
+ const f=$("filterSelect").value;
+ if(f==="cinematic"){ $("hue").value ||= 0 }
+ if(f==="cold") document.documentElement.style.setProperty("--hue","-18deg");
+ else if(f==="bloody") document.documentElement.style.setProperty("--hue","8deg");
+ else if(f==="paper") document.documentElement.style.setProperty("--hue","22deg");
+ else document.documentElement.style.setProperty("--hue", $("hue").value+"deg");
+}
+function update(){
+ $("nameView").textContent=$("nameInput").value||"SEM NOME";
+ $("ageView").textContent=($("ageInput").value||"—")+" Anos";
+ $("roleView").textContent=$("roleInput").value||"Sem patente";
+ $("familyView").textContent=$("familyInput").value||"—";
+ $("regView").textContent=$("regInput").value||"—"; $("regView2").textContent=$("regInput").value||"—";
+ $("quoteView").textContent="“"+($("quoteInput").value||"")+"”";
+ $("notesView").textContent=$("notesInput").value||"";
+ $("traitsView").innerHTML=tokenize($("traitsInput").value);
+ $("equipView").innerHTML=tokenize($("equipInput").value);
+ document.documentElement.style.setProperty("--portrait-scale",$("zoom").value);
+ document.documentElement.style.setProperty("--portrait-x",$("posX").value+"%");
+ document.documentElement.style.setProperty("--portrait-y",$("posY").value+"%");
+ document.documentElement.style.setProperty("--vignette",$("vignette").value);
+ document.documentElement.style.setProperty("--grain",$("grain").value);
+ if($("filterSelect").value==="cinematic") document.documentElement.style.setProperty("--hue",$("hue").value+"deg");
+ theme(); filter();
+
+ [["hpNow","hpSlider","hpMax"],["stNow","stSlider","stMax"],["moNow","moSlider","moMax"],["arNow","arSlider","arMax"]].forEach(a=>syncRange(...a));
+ const hpP=pct(+$("hpNow").value,+$("hpMax").value), stP=pct(+$("stNow").value,+$("stMax").value), moP=pct(+$("moNow").value,+$("moMax").value), arP=pct(+$("arNow").value,+$("arMax").value);
+ $("hpFill").style.width=hpP+"%"; $("stFill").style.width=stP+"%"; $("moFill").style.width=moP+"%"; $("arFill").style.width=arP+"%";
+ $("hpText").textContent=Math.round(hpP)+"%"; $("stText").textContent=`${$("stNow").value} / ${$("stMax").value}`; $("moText").textContent=`${$("moNow").value} / ${$("moMax").value}`; $("arText").textContent=`${$("arNow").value} / ${$("arMax").value}`;
+ const danger=1-hpP/100, exhaustion=1-stP/100, moraleLoss=1-moP/100;
+ document.documentElement.style.setProperty("--danger",danger.toFixed(2)); document.documentElement.style.setProperty("--exhaustion",exhaustion.toFixed(2)); document.documentElement.style.setProperty("--moraleLoss",moraleLoss.toFixed(2));
+ $("riskMetric").textContent=Math.round(danger*100)+"%"; $("fatigueMetric").textContent=Math.round(exhaustion*100)+"%";
+ const c=$("conditionSelect").value; $("statusView").textContent=c==="normal"?"Operacional":c.charAt(0).toUpperCase()+c.slice(1);
+ ["normal","ferido","sangrando","critico","inconsciente"].forEach(x=>$("cond-"+x).classList.toggle("active",x===c));
+ const cardEl=$("card");
+ if(cardEl){
+   cardEl.classList.remove("state-operacional","state-ferido","state-sangrando","state-critico","state-inconsciente");
+   cardEl.classList.add("state-"+(c||condition||"normal"));
+ }
+ if($("physicalCondition")){
+   const v=Math.round(hpP);
+   $("physicalCondition").textContent = v>=81 ? "Excelente" : v>=61 ? "Estável" : v>=41 ? "Debilitado" : v>=21 ? "Grave" : "Colapso";
+ }
+ $("deathbox").classList.toggle("show", hpP<=20 || c==="critico" || c==="inconsciente");
+ $("card").classList.toggle("ultimate-critical", hpP<=15 || c==="inconsciente");
+ $("logView").innerHTML=combatLog.length?combatLog.slice(-8).reverse().map(escapeHtml).join("<br>"):"Nenhuma alteração registrada.";
+}
+fields.forEach(id=>$(id).addEventListener("input",update));
+["hpSlider","stSlider","moSlider","arSlider"].forEach(id=>$(id).addEventListener("input",()=>{ const map={hpSlider:"hpNow",stSlider:"stNow",moSlider:"moNow",arSlider:"arNow"}; $(map[id]).value=$(id).value; update();}));
+$("photoInput").addEventListener("change",e=>{const file=e.target.files[0]; if(!file)return; const r=new FileReader(); r.onload=()=>{$("portrait").src=r.result; saveSheet(false)}; r.readAsDataURL(file)});
+function log(msg){combatLog.push(new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" — "+msg); update()}
+function quickDamage(v){$("hpNow").value=clamp((+$("hpNow").value||0)-v,0,+$("hpMax").value||1); log("-"+v+" de Vitalidade")}
+function quickStamina(v){$("stNow").value=clamp((+$("stNow").value||0)-v,0,+$("stMax").value||1); log("-"+v+" de Estamina")}
+function quickMorale(v){$("moNow").value=clamp((+$("moNow").value||0)-v,0,+$("moMax").value||1); log("-"+v+" de Moral")}
+function applyAttack(){quickStamina(8);quickMorale(2);log("Ação ofensiva registrada")}
+function rest(){
+ $("stNow").value=clamp((+$("stNow").value||0)+15,0,+$("stMax").value||1);
+ $("moNow").value=clamp((+$("moNow").value||0)+5,0,+$("moMax").value||1);
+ log("Descanso curto aplicado");
+}
+function getData(){const d={}; fields.forEach(id=>d[id]=$(id).value); d.portrait=$("portrait").src; d.combatLog=combatLog; return d}
+function setData(d){fields.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id]}); if(d.portrait)$("portrait").src=d.portrait; combatLog=d.combatLog||[]; update()}
+function saveSheet(show=true){localStorage.setItem("TFD_Painel_Vivo_Final",JSON.stringify(getData())); if(show)alert("Dados salvos neste navegador.")}
+function loadSheet(){const raw=localStorage.getItem("TFD_Painel_Vivo_Final"); if(!raw)return alert("Nenhum dado salvo encontrado."); setData(JSON.parse(raw))}
+function resetSheet(){if(!confirm("Resetar dados?"))return; localStorage.removeItem("TFD_Painel_Vivo_Final"); location.reload()}
+function exportJSON(){const blob=new Blob([JSON.stringify(getData(),null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="the-first-defense-painel-final.json"; a.click()}
+update();
+</script>
+
+<script>
+(function(){
+  function byId(id){return document.getElementById(id)}
+  function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+  function syncFinalVisuals(){
+    const hpNow=parseInt(byId("hpNow")?.value||"100",10);
+    const hpMax=Math.max(parseInt(byId("hpMax")?.value||"100",10),1);
+    const stNow=parseInt(byId("stNow")?.value||"0",10);
+    const stMax=Math.max(parseInt(byId("stMax")?.value||"1",10),1);
+    const moNow=parseInt(byId("moNow")?.value||"0",10);
+    const moMax=Math.max(parseInt(byId("moMax")?.value||"1",10),1);
+    const arNow=parseInt(byId("arNow")?.value||"0",10);
+    const arMax=Math.max(parseInt(byId("arMax")?.value||"1",10),1);
+    const hpP=clamp((hpNow/hpMax)*100,0,100);
+    const stP=clamp((stNow/stMax)*100,0,100);
+    const moP=clamp((moNow/moMax)*100,0,100);
+    const arP=clamp((arNow/arMax)*100,0,100);
+
+    if(byId("hpText")) byId("hpText").textContent=Math.round(hpP)+"%";
+    [["hpFill",hpP],["stFill",stP],["moFill",moP],["arFill",arP]].forEach(([id,p])=>{
+      const el=byId(id);
+      if(el){ el.style.width=p+"%"; el.style.backgroundPosition=(100-p)+"% 0"; }
+    });
+
+    const condition=byId("conditionSelect")?.value || "normal";
+    const card=byId("card");
+    if(card){
+      card.classList.remove("state-operacional","state-ferido","state-sangrando","state-critico","state-inconsciente");
+      card.classList.add("state-"+condition);
+    }
+    if(byId("physicalCondition")){
+      byId("physicalCondition").textContent = hpP>=81 ? "Excelente" : hpP>=61 ? "Estável" : hpP>=41 ? "Debilitado" : hpP>=21 ? "Grave" : "Colapso";
+    }
+  }
+
+  ["hpSlider","hpNow","hpMax","stSlider","stNow","stMax","moSlider","moNow","moMax","arSlider","arNow","arMax","conditionSelect"].forEach(id=>{
+    const el=byId(id);
+    if(el) el.addEventListener("input",()=>setTimeout(syncFinalVisuals,0));
+    if(el) el.addEventListener("change",()=>setTimeout(syncFinalVisuals,0));
+  });
+
+  window.addEventListener("load",()=>setTimeout(syncFinalVisuals,80));
+})();
+</script>
+
+
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+  window.healVitality = function(v){
+    const now = byId("hpNow"), max = byId("hpMax");
+    if(!now || !max) return;
+    now.value = clamp((parseInt(now.value||"0",10)+v),0,parseInt(max.value||"100",10));
+    if(typeof window.log === "function") window.log("+"+v+" de Vitalidade");
+    if(typeof window.update === "function") window.update();
+    syncFinalPolish();
+    autosaveFinal();
+  };
+  window.healStamina = function(v){
+    const now = byId("stNow"), max = byId("stMax");
+    if(!now || !max) return;
+    now.value = clamp((parseInt(now.value||"0",10)+v),0,parseInt(max.value||"80",10));
+    if(typeof window.log === "function") window.log("+"+v+" de Estamina");
+    if(typeof window.update === "function") window.update();
+    syncFinalPolish();
+    autosaveFinal();
+  };
+  window.healMorale = function(v){
+    const now = byId("moNow"), max = byId("moMax");
+    if(!now || !max) return;
+    now.value = clamp((parseInt(now.value||"0",10)+v),0,parseInt(max.value||"60",10));
+    if(typeof window.log === "function") window.log("+"+v+" de Moral");
+    if(typeof window.update === "function") window.update();
+    syncFinalPolish();
+    autosaveFinal();
+  };
+
+  function percent(nowId,maxId){
+    const now=parseInt(byId(nowId)?.value||"0",10);
+    const max=Math.max(parseInt(byId(maxId)?.value||"1",10),1);
+    return clamp((now/max)*100,0,100);
+  }
+
+  function trustLabel(moP){
+    if(moP >= 81) return "Confiável";
+    if(moP >= 61) return "Instável";
+    if(moP >= 41) return "Suspeito";
+    if(moP >= 21) return "Ameaça";
+    return "Hostil";
+  }
+
+  function syncFinalPolish(){
+    const hpP=percent("hpNow","hpMax");
+    const stP=percent("stNow","stMax");
+    const moP=percent("moNow","moMax");
+    const arP=percent("arNow","arMax");
+
+    [["hpFill",hpP],["stFill",stP],["moFill",moP],["arFill",arP]].forEach(([id,p])=>{
+      const el=byId(id);
+      if(el){
+        el.style.width=p+"%";
+        el.style.backgroundPosition=(100-p)+"% 0";
+      }
+    });
+
+    if(byId("hpText")) byId("hpText").textContent=Math.round(hpP)+"%";
+    if(byId("stText")) byId("stText").textContent=(byId("stNow").value||"0")+" / "+(byId("stMax").value||"0");
+    if(byId("moText")) byId("moText").textContent=(byId("moNow").value||"0")+" / "+(byId("moMax").value||"0");
+    if(byId("arText")) byId("arText").textContent=(byId("arNow").value||"0")+" / "+(byId("arMax").value||"0");
+
+    if(byId("trustMetric")) byId("trustMetric").textContent=trustLabel(moP);
+
+    const condition = byId("conditionSelect")?.value || "normal";
+    const card = byId("card");
+    if(card){
+      card.classList.remove("state-operacional","state-ferido","state-sangrando","state-critico","state-inconsciente");
+      card.classList.add("state-"+condition);
+    }
+  }
+
+  ["normal","ferido","sangrando","critico","inconsciente"].forEach(state=>{
+    const el=byId("cond-"+state);
+    if(el){
+      el.addEventListener("click",()=>{
+        const select=byId("conditionSelect");
+        if(select){
+          select.value=state;
+          select.dispatchEvent(new Event("input",{bubbles:true}));
+          select.dispatchEvent(new Event("change",{bubbles:true}));
+        }
+        if(typeof window.update === "function") window.update();
+        syncFinalPolish();
+        autosaveFinal();
+      });
+    }
+  });
+
+  let autosaveTimer=null;
+  function autosaveFinal(){
+    clearTimeout(autosaveTimer);
+    autosaveTimer=setTimeout(()=>{
+      try{
+        if(typeof window.saveSheet === "function") window.saveSheet(false);
+      }catch(e){}
+    },450);
+  }
+
+  ["hpSlider","hpNow","hpMax","stSlider","stNow","stMax","moSlider","moNow","moMax","arSlider","arNow","arMax","conditionSelect","traitsInput","equipInput","notesInput","nameInput","roleInput","familyInput","quoteInput"].forEach(id=>{
+    const el=byId(id);
+    if(el){
+      el.addEventListener("input",()=>{ setTimeout(syncFinalPolish,0); autosaveFinal(); });
+      el.addEventListener("change",()=>{ setTimeout(syncFinalPolish,0); autosaveFinal(); });
+    }
+  });
+
+  window.addEventListener("load",()=>setTimeout(syncFinalPolish,120));
+})();
+</script>
+
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v,min,max) => Math.max(min, Math.min(max, v));
+  let autosaveTimer = null;
+
+  function pct(nowId, maxId){
+    const now = parseInt($(nowId)?.value || "0", 10);
+    const max = Math.max(parseInt($(maxId)?.value || "1", 10), 1);
+    return clamp((now / max) * 100, 0, 100);
+  }
+
+  function labelCondicao(v){
+    if(v >= 81) return "Excelente";
+    if(v >= 61) return "Estável";
+    if(v >= 41) return "Debilitado";
+    if(v >= 21) return "Grave";
+    return "Colapso";
+  }
+
+  function labelConfianca(v){
+    if(v >= 81) return "Confiável";
+    if(v >= 61) return "Instável";
+    if(v >= 41) return "Suspeito";
+    if(v >= 21) return "Ameaça";
+    return "Hostil";
+  }
+
+  function refreshFinal(){
+    const hpP = pct("hpNow","hpMax");
+    const stP = pct("stNow","stMax");
+    const moP = pct("moNow","moMax");
+    const arP = pct("arNow","arMax");
+
+    const bars = [["hpFill",hpP],["stFill",stP],["moFill",moP],["arFill",arP]];
+    bars.forEach(([id,p]) => {
+      const el = $(id);
+      if(!el) return;
+      el.style.width = p + "%";
+      el.style.backgroundPosition = (100 - p) + "% 0";
+    });
+
+    if($("hpText")) $("hpText").textContent = Math.round(hpP) + "%";
+    if($("stText")) $("stText").textContent = ($("stNow")?.value || "0") + " / " + ($("stMax")?.value || "0");
+    if($("moText")) $("moText").textContent = ($("moNow")?.value || "0") + " / " + ($("moMax")?.value || "0");
+    if($("arText")) $("arText").textContent = ($("arNow")?.value || "0") + " / " + ($("arMax")?.value || "0");
+
+    const danger = 1 - hpP / 100;
+    const exhaustion = 1 - stP / 100;
+    const moraleLoss = 1 - moP / 100;
+
+    document.documentElement.style.setProperty("--danger", clamp(danger,0,1).toFixed(2));
+    document.documentElement.style.setProperty("--exhaustion", clamp(exhaustion,0,1).toFixed(2));
+    document.documentElement.style.setProperty("--moraleLoss", clamp(moraleLoss,0,1).toFixed(2));
+
+    if($("riskMetric")) $("riskMetric").textContent = Math.round(danger * 100) + "%";
+    if($("fatigueMetric")) $("fatigueMetric").textContent = Math.round(exhaustion * 100) + "%";
+    if($("physicalCondition")) $("physicalCondition").textContent = labelCondicao(hpP);
+    if($("trustMetric")) $("trustMetric").textContent = labelConfianca(moP);
+
+    const condition = $("conditionSelect")?.value || "normal";
+    ["normal","ferido","sangrando","critico","inconsciente"].forEach(state => {
+      const cond = $("cond-" + state);
+      if(cond) cond.classList.toggle("active", state === condition);
+    });
+
+    const card = $("card");
+    if(card){
+      card.classList.remove("state-operacional","state-ferido","state-sangrando","state-critico","state-inconsciente");
+      card.classList.add("state-" + condition);
+    }
+  }
+
+  function autosave(){
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => {
+      try{
+        if(typeof window.saveSheet === "function") window.saveSheet(false);
+      }catch(e){}
+    }, 650);
+  }
+
+  function bind(){
+    const ids = [
+      "hpSlider","hpNow","hpMax","stSlider","stNow","stMax","moSlider","moNow","moMax",
+      "arSlider","arNow","arMax","conditionSelect","traitsInput","equipInput","notesInput",
+      "nameInput","roleInput","familyInput","quoteInput","themeSelect","filterSelect","vignette","grain","hue"
+    ];
+
+    ids.forEach(id => {
+      const el = $(id);
+      if(!el) return;
+      el.addEventListener("input", () => {
+        setTimeout(refreshFinal, 0);
+        autosave();
+      });
+      el.addEventListener("change", () => {
+        setTimeout(refreshFinal, 0);
+        autosave();
+      });
+    });
+
+    ["normal","ferido","sangrando","critico","inconsciente"].forEach(state => {
+      const el = $("cond-" + state);
+      if(!el) return;
+      el.addEventListener("click", () => {
+        const select = $("conditionSelect");
+        if(select){
+          select.value = state;
+          select.dispatchEvent(new Event("input", {bubbles:true}));
+          select.dispatchEvent(new Event("change", {bubbles:true}));
+        }
+        refreshFinal();
+        autosave();
+      });
+    });
+  }
+
+  window.refreshTheFirstFinal = refreshFinal;
+  window.addEventListener("load", () => {
+    bind();
+    setTimeout(refreshFinal, 100);
+  });
+})();
+</script>
+
+
+<script>
+/* THE FIRST DEFENSE — Ponte segura do Painel Vivo
+   Mantém o layout intacto, comprime foto e envia os dados para o index.html salvar online. */
+(function(){
+  const MAX_SIZE = 560;
+  const QUALITY = 0.64;
+
+  function compressDataUrl(dataUrl){
+    return new Promise((resolve) => {
+      if(!dataUrl || !String(dataUrl).startsWith("data:image/")) return resolve(dataUrl);
+
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, MAX_SIZE / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+        resolve(canvas.toDataURL("image/jpeg", QUALITY));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  }
+
+  function fileToDataUrl(file){
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async () => resolve(await compressDataUrl(reader.result));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function applyData(data){
+    data = data || {};
+    try{
+      if(typeof setData === "function") {
+        setData(data);
+      } else {
+        Object.keys(data).forEach(k => {
+          const el = document.getElementById(k);
+          if(el && "value" in el) el.value = data[k];
+        });
+      }
+
+      const portrait = document.getElementById("portrait");
+      if(portrait && data.portrait) portrait.src = data.portrait;
+
+      if(typeof update === "function") update();
+      if(typeof refreshTheFirstFinal === "function") refreshTheFirstFinal();
+    }catch(e){
+      console.error("Erro ao aplicar dados do painel:", e);
+    }
+  }
+
+  async function collectData(){
+    let data = {};
+    try{
+      if(typeof getData === "function") data = getData() || {};
+    }catch(e){
+      data = {};
+    }
+
+    if(!Object.keys(data).length){
+      document.querySelectorAll("input, textarea, select").forEach(el => {
+        if(el.id) data[el.id] = el.value;
+      });
+    }
+
+    const portrait = document.getElementById("portrait");
+    if(portrait && portrait.src && portrait.src.startsWith("data:image/")) {
+      data.portrait = await compressDataUrl(portrait.src);
+    }
+
+    return data;
+  }
+
+  window.addEventListener("load", () => {
+    const oldInput = document.getElementById("photoInput");
+    const portrait = document.getElementById("portrait");
+
+    if(oldInput && portrait){
+      const input = oldInput.cloneNode(true);
+      oldInput.parentNode.replaceChild(input, oldInput);
+
+      input.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if(!file) return;
+
+        portrait.src = await fileToDataUrl(file);
+
+        try{
+          if(typeof saveSheet === "function") saveSheet(false);
+        }catch(err){}
+      });
+    }
+  });
+
+  window.addEventListener("message", async (event) => {
+    if(event.data?.type === "TFD_LOAD_PANEL") {
+      applyData(event.data.payload || {});
+    }
+
+    if(event.data?.type === "TFD_REQUEST_EXPORT") {
+      const payload = await collectData();
+      window.parent.postMessage({ type: "TFD_PANEL_EXPORT", payload }, "*");
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

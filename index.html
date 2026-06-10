@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The First Defense — Painel Online</title>
+<link rel="stylesheet" href="online.css">
+</head>
+<body>
+
+<section id="loginScreen" class="login-shell">
+  <div class="login-card">
+    <div class="seal">TFD</div>
+    <h1>THE FIRST DEFENSE</h1>
+    <p>Painel Vivo Online</p>
+
+    <label>E-mail</label>
+    <input id="email" type="email" autocomplete="username" placeholder="jogador@email.com">
+
+    <label>Senha</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+
+    <button id="loginBtn">Entrar</button>
+    <small id="loginMsg"></small>
+  </div>
+</section>
+
+<section id="appScreen" class="app hidden">
+  <aside class="sidebar">
+    <h2>ARQUIVO CENTRAL</h2>
+    <div id="userInfo"></div>
+
+    <div class="master-block hidden" id="masterBlock">
+      <hr>
+      <h3>PAINÉIS DOS JOGADORES</h3>
+      <div id="playerList"></div>
+    </div>
+
+    <hr>
+    <button id="saveBtn">Salvar online</button>
+    <button id="reloadBtn">Recarregar painel</button>
+    <button id="masterBtn" class="hidden">Painel do Mestre</button>
+    <button id="logoutBtn">Sair</button>
+
+    <small id="saveStatus"></small>
+  </aside>
+
+  <main class="panel-frame">
+    <iframe id="panelFrame" src="painel.html"></iframe>
+  </main>
+</section>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
