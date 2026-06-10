@@ -1,15 +1,10 @@
-// The First Defense — Configuração Firebase
-// Este é o único arquivo que você precisa editar depois de subir no GitHub.
-
 export const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI.firebaseapp.com",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
+  apiKey: "AIzaSyAaLrEGeJwsMPp7POR2eSIKqSLCjb12SyM",
+  authDomain: "tfd-painel-online.firebaseapp.com",
+  projectId: "tfd-painel-online",
+  storageBucket: "tfd-painel-online.firebasestorage.app",
+  messagingSenderId: "86036031512",
+  appId: "1:86036031512:web:264823f300873550d6deed"
 };
 
-// Coloque aqui o e-mail da sua conta de mestre/admin.
-// Precisa ser igual ao e-mail criado no Firebase Authentication.
 export const MASTER_EMAIL = "contato.vitortharles@gmail.com";
